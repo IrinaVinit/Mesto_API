@@ -16,9 +16,12 @@ export const getUserById = (req: Request, res: Response) => {
     });
 };
 
-export const createUser = (req: Request, res: Response) => {
+export const createUser = async (req: Request, res: Response) => {
   const { name, about, avatar } = req.body;
-  return User.create({ name, about, avatar })
-    .then((user) => res.send(user))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка при создании пользователя' }));
+  try {
+    const user = await User.create({ name, about, avatar });
+    return res.send(user);
+  } catch {
+    return res.status(500).send({ message: 'Произошла ошибка при создании пользователя' });
+  }
 };
