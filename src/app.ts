@@ -12,16 +12,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
-app.use('/users', userRouter);
-app.use('/cards', cardRouter);
 
-app.use((req: IUserRequest, _res: Response, next: NextFunction) => {
+app.use((req: Request, _res: Response, next: NextFunction) => {
   req.user = {
     _id: '65913fe8e464045ead0a864a',
   };
 
   next();
 });
+
+app.use('/users', userRouter);
+app.use('/cards', cardRouter);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console

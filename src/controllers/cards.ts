@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
-import { IUserRequest } from '../types';
 import Card from '../models/card';
 
-export const createCard = (req: IUserRequest, res: Response) => {
+export const createCard = (req: Request, res: Response) => {
   const { name, link } = req.body;
   return Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send(card))
