@@ -1,7 +1,6 @@
-import express, { NextFunction, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import cardRouter from './routes/cards';
-import { IUserRequest } from './types';
 import userRouter from './routes/user';
 
 const { PORT = 3000 } = process.env;
