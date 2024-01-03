@@ -4,7 +4,11 @@ import Card from '../models/card';
 
 export const createCard = (req: Request, res: Response) => {
   const { name, link } = req.body;
-  return Card.create({ name, link, owner: req.user._id })
+  return Card.create({
+    name,
+    link,
+    owner: req.user._id,
+  })
     .then((card) => res.send(card))
     .catch((err) => res.status(500).send({ message: 'Произошла ошибка', err }));
 };
