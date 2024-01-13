@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import { StatusCodes } from '../constants/statusCodes';
 import Card from '../models/card';
 // import NotFoundError from '../errors/not-found-err';
 
@@ -17,14 +16,14 @@ export const createCard = (req: Request, res: Response) => {
 export const getCards = (req: Request, res: Response) => Card.find({})
   .then((cards) => res.send({ data: cards }))
   .catch(() => {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка при загрузке карточек' });
+    res.status(500).send({ message: 'Произошла ошибка при загрузке карточек' });
   });
 
 export const deleteCard = (req: Request, res: Response) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => res.send(card))
     .catch(() => {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'ошибка при удалении карточки' });
+      res.status(500).send({ message: 'ошибка при удалении карточки' });
     });
 };
 

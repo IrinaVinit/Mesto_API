@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+const validator = require('validator');
+
 interface IUser {
   name: string;
   about: string;
@@ -22,7 +24,11 @@ const userSchema = new mongoose.Schema<IUser>({
   avatar: {
     type: String,
     required: true,
+    validate: {
+      validator: (value: String) => (validator.isURL(value, { protocols: ['http', 'https', 'ftp'], require_tld: true, require_protocol: true })),
+      message: 'Введите корректную ссылку на картинку',
+    },
   },
-});
+}, { versionKey: false });
 
-export default mongoose.model<IUser>('User', userSchema);
+export default mongoose.model<IUser>('user', userSchema);

@@ -1,20 +1,35 @@
 import { Request, Response } from 'express';
-import { StatusCodes } from '../constants/statusCodes';
+
+import mongoose from 'mongoose';
 import User from '../models/user';
 
-export const getUsers = (req: Request, res: Response) => User.find({})
-  .then((users) => res.send({ data: users }))
-  .catch(() => {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка при загрузке пользователей' });
-  });
+export const getUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await User.find({});
+    res.send(users);
+  } catch (err) {
+    res.status(500).send({ message: 'Oшибка при загрузке пользователей' });
+  }
+};
 
-export const getUserById = (req: Request, res: Response) => {
-  const { _id } = req.body;
-  User.find({ _id })
-    .then((user) => res.send({ data: user }))
-    .catch(() => {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Пользователь не найден' });
+export const getUserById = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId).orFail(() => {
+      const error = new Error('Пользователь не найден');
+      error.name = 'NotFoundError';
+      return error;
     });
+    return res.send(user);
+  } catch (err) {
+    if (err instanceof Error && err.name === 'NotFoundError') {
+      return res.status(404).send({ message: err.message });
+    }
+    if (err instanceof mongoose.Error.CastError) {
+      return res.status(400).send({ message: 'Не валидный ID пользователя' });
+    }
+    return res.status(500).send({ message: 'Oшибка на стороне сервера' });
+  }
 };
 
 export const createUser = async (req: Request, res: Response) => {
@@ -23,7 +38,7 @@ export const createUser = async (req: Request, res: Response) => {
     const user = await User.create({ name, about, avatar });
     return res.send(user);
   } catch {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка при создании пользователя' });
+    return res.status(500).send({ message: 'Произошла ошибка при создании пользователя' });
   }
 };
 
