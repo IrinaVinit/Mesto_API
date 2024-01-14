@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-
+import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
 import User from '../models/user';
 
@@ -8,7 +8,7 @@ export const getUsers = async (req: Request, res: Response) => {
     const users = await User.find({});
     res.send(users);
   } catch (err) {
-    res.status(500).send({ message: 'Oшибка при загрузке пользователей' });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Oшибка при загрузке пользователей' });
   }
 };
 
@@ -23,12 +23,12 @@ export const getUserById = async (req: Request, res: Response) => {
     return res.send(user);
   } catch (err) {
     if (err instanceof Error && err.name === 'NotFoundError') {
-      return res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
+      return res.status(StatusCodes.NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден' });
     }
     if (err instanceof mongoose.Error.CastError) {
-      return res.status(400).send({ message: 'Не валидный ID пользователя' });
+      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Не валидный ID пользователя' });
     }
-    return res.status(500).send({ message: 'Oшибка на стороне сервера' });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Oшибка на стороне сервера' });
   }
 };
 
@@ -39,9 +39,9 @@ export const createUser = async (req: Request, res: Response) => {
     return res.send(user);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
     }
-    return res.status(500).send({ message: 'Произошла ошибка при создании пользователя' });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка при создании пользователя' });
   }
 };
 
@@ -55,9 +55,9 @@ export const updateUser = async (req: Request, res: Response) => {
     return res.send(user);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      return res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля' });
     }
-    return res.status(500).send({ message: 'Произошла ошибка при обновлении профиля' });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка при обновлении профиля' });
   }
 };
 
@@ -71,11 +71,11 @@ export const updateAvatar = async (req: Request, res: Response) => {
     return res.send(user);
   } catch (err) {
     if (err instanceof Error && err.name === 'NotFoundError') {
-      return res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
+      return res.status(StatusCodes.NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден' });
     }
     if (err instanceof mongoose.Error.ValidationError) {
-      return res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара' });
+      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении аватара' });
     }
-    return res.status(500).send({ message: 'Произошла ошибка при обновлении аватара' });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка при обновлении аватара' });
   }
 };
