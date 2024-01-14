@@ -16,14 +16,14 @@ export const getUserById = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     const user = await User.findById(userId).orFail(() => {
-      const error = new Error('Пользователь не найден');
-      error.name = 'NotFoundError';
-      return error;
+      const err = new Error('Пользователь не найден');
+      err.name = 'NotFoundError';
+      return err;
     });
     return res.send(user);
   } catch (err) {
     if (err instanceof Error && err.name === 'NotFoundError') {
-      return res.status(StatusCodes.NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден' });
+      return res.status(StatusCodes.NOT_FOUND).send({ message: err });
     }
     if (err instanceof mongoose.Error.CastError) {
       return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Не валидный ID пользователя' });
