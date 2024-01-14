@@ -1,16 +1,17 @@
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
+import 'dotenv/config';
 import cardRouter from './routes/cards';
 import userRouter from './routes/user';
 
-const { PORT = 3003 } = process.env;
+const { PORT = 3003, MONGO_URL } = process.env;
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+mongoose.connect(MONGO_URL as string);
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
   req.user = {

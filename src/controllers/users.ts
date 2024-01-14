@@ -23,7 +23,7 @@ export const getUserById = async (req: Request, res: Response) => {
     return res.send(user);
   } catch (err) {
     if (err instanceof Error && err.name === 'NotFoundError') {
-      return res.status(404).send({ message: err.message });
+      return res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
     }
     if (err instanceof mongoose.Error.CastError) {
       return res.status(400).send({ message: 'Не валидный ID пользователя' });
@@ -37,7 +37,10 @@ export const createUser = async (req: Request, res: Response) => {
   try {
     const user = await User.create({ name, about, avatar });
     return res.send(user);
-  } catch {
+  } catch (err) {
+    if (err instanceof mongoose.Error.ValidationError) {
+      return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+    }
     return res.status(500).send({ message: 'Произошла ошибка при создании пользователя' });
   }
 };
@@ -50,7 +53,10 @@ export const updateUser = async (req: Request, res: Response) => {
       runValidators: true,
     });
     return res.send(user);
-  } catch {
+  } catch (err) {
+    if (err instanceof mongoose.Error.ValidationError) {
+      return res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+    }
     return res.status(500).send({ message: 'Произошла ошибка при обновлении профиля' });
   }
 };
@@ -63,7 +69,13 @@ export const updateAvatar = async (req: Request, res: Response) => {
       runValidators: true,
     });
     return res.send(user);
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.name === 'NotFoundError') {
+      return res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
+    }
+    if (err instanceof mongoose.Error.ValidationError) {
+      return res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара' });
+    }
     return res.status(500).send({ message: 'Произошла ошибка при обновлении аватара' });
   }
 };
