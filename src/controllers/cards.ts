@@ -11,7 +11,7 @@ export const createCard = async (req: Request, res: Response) => {
       link,
       owner: req.user._id,
     });
-    return res.send(card);
+    return res.status(StatusCodes.CREATED).send(card);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
       return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки' });
@@ -38,6 +38,9 @@ export const deleteCard = async (req: Request, res: Response) => {
     });
     return res.send(card);
   } catch (err) {
+    if (err instanceof mongoose.Error.CastError) {
+      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Передан невалидный ID' });
+    }
     if (err instanceof Error && err.name === 'NotFoundError') {
       return res.status(StatusCodes.NOT_FOUND).send({ message: err });
     }
@@ -62,8 +65,8 @@ const updateLike = async (req: Request, res: Response, method: string) => {
     if (err instanceof Error && err.name === 'NotFoundError') {
       return res.status(StatusCodes.NOT_FOUND).send({ message: err });
     }
-    if (err instanceof mongoose.Error.ValidationError) {
-      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
+    if (err instanceof mongoose.Error.CastError) {
+      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Передан невалидный ID' });
     }
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Oшибка на стороне сервера' });
   }

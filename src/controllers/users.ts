@@ -36,7 +36,7 @@ export const createUser = async (req: Request, res: Response) => {
   const { name, about, avatar } = req.body;
   try {
     const user = await User.create({ name, about, avatar });
-    return res.send(user);
+    return res.status(StatusCodes.CREATED).send(user);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
       return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });

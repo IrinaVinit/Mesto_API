@@ -32,6 +32,6 @@ const cardSchema = new mongoose.Schema<ICard>({
     type: Date,
     default: Date.now,
   },
-});
+}, { versionKey: false });
 
 export default mongoose.model<ICard>('card', cardSchema);
