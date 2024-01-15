@@ -7,7 +7,7 @@ import userRouter from './routes/user';
 const helmet = require('helmet');
 
 const { PORT = 3003, MONGO_URL } = process.env;
-
+// большое спасибо за такие крутые рекомендации к ревью!
 const app = express();
 app.use(helmet());
 app.use(express.json());
