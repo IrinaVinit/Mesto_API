@@ -6,6 +6,8 @@ interface IUser {
   name: string;
   about: string;
   avatar: string;
+  email: string;
+  password: string;
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -28,6 +30,19 @@ const userSchema = new mongoose.Schema<IUser>({
       validator: (value: String) => (validator.isURL(value, { protocols: ['http', 'https', 'ftp'], require_tld: true, require_protocol: true })),
       message: 'Введите корректную ссылку на картинку',
     },
+  },
+  email: {
+    type: String,
+    required: [true, 'Поле "email" должно быть заполнено'],
+    validate: {
+      validator: (email: string) => validator.isEmail(email),
+      message: 'Введен некорректный email',
+    },
+  },
+  password: {
+    type: String,
+    required: true,
+    select: false,
   },
 }, { versionKey: false });
 
