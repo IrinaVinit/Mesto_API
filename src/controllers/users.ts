@@ -3,6 +3,8 @@ import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
 import User from '../models/user';
 
+const bcrypt = require('bcrypt');
+
 export const getUsers = async (req: Request, res: Response) => {
   try {
     const users = await User.find({});
@@ -33,9 +35,14 @@ export const getUserById = async (req: Request, res: Response) => {
 };
 
 export const createUser = async (req: Request, res: Response) => {
-  const { name, about, avatar } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  const hashPassword = await bcrypt.hash(password, 10);
   try {
-    const user = await User.create({ name, about, avatar });
+    const user = await User.create({
+      name, about, avatar, email, password: hashPassword,
+    });
     return res.status(StatusCodes.CREATED).send(user);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
