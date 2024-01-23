@@ -1,7 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import 'dotenv/config';
-import { createUser, login } from 'controllers/users';
+import { createUser, login } from './controllers/users';
 import cardRouter from './routes/cards';
 import userRouter from './routes/user';
 
