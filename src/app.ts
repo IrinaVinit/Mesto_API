@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import 'dotenv/config';
+import { auth } from './middlewares/auth';
 import { createUser, login } from './controllers/users';
 import cardRouter from './routes/cards';
 import userRouter from './routes/user';
@@ -24,10 +25,12 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-app.use('/users', userRouter);
-app.use('/cards', cardRouter);
 app.post('/signin', login);
 app.post('/signup', createUser);
+
+app.use(auth);
+app.use('/users', userRouter);
+app.use('/cards', cardRouter);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
