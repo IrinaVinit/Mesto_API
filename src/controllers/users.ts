@@ -35,6 +35,11 @@ export const getUserById = async (req: Request, res: Response) => {
   }
 };
 
+export const getMyUser = async (req: Request, res: Response) => {
+  const user = await User.findById(req.user._id);
+  res.send(user);
+};
+
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   const {
     name, about, avatar, email, password,

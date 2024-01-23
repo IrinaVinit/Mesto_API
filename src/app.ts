@@ -17,14 +17,6 @@ app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect(MONGO_URL as string);
 
-app.use((req: Request, _res: Response, next: NextFunction) => {
-  req.user = {
-    _id: '65913fe8e464045ead0a864a',
-  };
-
-  next();
-});
-
 app.post('/signin', login);
 app.post('/signup', createUser);
 
