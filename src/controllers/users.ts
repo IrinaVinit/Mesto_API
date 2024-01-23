@@ -1,6 +1,7 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
 import User from '../models/user';
 
 const bcrypt = require('bcrypt');
@@ -34,7 +35,7 @@ export const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -45,10 +46,13 @@ export const createUser = async (req: Request, res: Response) => {
     });
     return res.status(StatusCodes.CREATED).send(user);
   } catch (err) {
-    if (err instanceof mongoose.Error.ValidationError) {
-      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
-    }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка при создании пользователя' });
+    return next(err);
+    // if (err instanceof mongoose.Error.ValidationError) {
+    // eslint-disable-next-line max-len
+    //   return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
+    // }
+    // eslint-disable-next-line max-len
+    // return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка при создании пользователя' });
   }
 };
 
@@ -85,4 +89,18 @@ export const updateAvatar = async (req: Request, res: Response) => {
     }
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка при обновлении аватара' });
   }
+};
+
+export const login = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email }).select('+password');
+  if (!user) {
+    return Promise.reject(new Error('Пользователя с такими данными не существует'));
+  }
+  const matched = await bcrypt.compare(password, user.password);
+  if (!matched) {
+    return Promise.reject(new Error('Пользователя с такими данными не существуе'));
+  }
+  const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+  return res.status(StatusCodes.OK).cookie('token', token).send();
 };
