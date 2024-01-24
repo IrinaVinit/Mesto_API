@@ -1,6 +1,7 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express from 'express';
 import mongoose from 'mongoose';
 import 'dotenv/config';
+import { errorLogger, requestLogger } from './middlewares/logger';
 import { auth } from './middlewares/auth';
 import { createUser, login } from './controllers/users';
 import cardRouter from './routes/cards';
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect(MONGO_URL as string);
+app.use(requestLogger);
 
 app.post('/signin', login);
 app.post('/signup', createUser);
@@ -23,6 +25,8 @@ app.post('/signup', createUser);
 app.use(auth);
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
+
+app.use(errorLogger);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
