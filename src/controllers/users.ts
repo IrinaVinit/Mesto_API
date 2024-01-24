@@ -74,16 +74,20 @@ export const updateAvatar = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email }).select('+password');
-  if (!user) {
-    return Promise.reject(new Error('Пользователя с такими данными не существует'));
+export const login = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      return Promise.reject(new Error('Пользователя с такими данными не существует'));
+    }
+    const matched = await bcrypt.compare(password, user.password);
+    if (!matched) {
+      return Promise.reject(new Error('Пользователя с такими данными не существует'));
+    }
+    const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+    return res.status(StatusCodes.OK).cookie('token', token).send();
+  } catch (err) {
+    return next(err);
   }
-  const matched = await bcrypt.compare(password, user.password);
-  if (!matched) {
-    return Promise.reject(new Error('Пользователя с такими данными не существует'));
-  }
-  const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
-  return res.status(StatusCodes.OK).cookie('token', `Bearer ${token}`).send();
 };
