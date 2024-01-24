@@ -52,12 +52,6 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     return res.status(StatusCodes.CREATED).send(user);
   } catch (err) {
     return next(err);
-    // if (err instanceof mongoose.Error.ValidationError) {
-    // eslint-disable-next-line max-len
-    //   return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
-    // }
-    // eslint-disable-next-line max-len
-    // return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка при создании пользователя' });
   }
 };
 

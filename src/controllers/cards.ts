@@ -31,18 +31,27 @@ export const getCards = async (req: Request, res: Response) => {
 
 export const deleteCard = async (req: Request, res: Response) => {
   try {
-    const card = await Card.findByIdAndRemove(req.params.cardId).orFail(() => {
+    const card = await Card.findById(req.params.cardId).orFail(() => {
       const error = new Error('Пользователь не найден');
       error.name = 'NotFoundError';
       return error;
     });
-    return res.send(card);
+    if (card.owner.toString() !== req.user?._id) {
+      const error = new Error('Вы можете удалять только свои карточки');
+      error.name = 'AccessError';
+      return error;
+    }
+    const cardToDelete = await card.deleteOne();
+    return res.status(StatusCodes.OK).send(cardToDelete);
   } catch (err) {
     if (err instanceof mongoose.Error.CastError) {
       return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Передан невалидный ID' });
     }
     if (err instanceof Error && err.name === 'NotFoundError') {
       return res.status(StatusCodes.NOT_FOUND).send({ message: err });
+    }
+    if (err instanceof Error && err.name === 'AccessError') {
+      return res.status(StatusCodes.FORBIDDEN).send({ message: err });
     }
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Oшибка на стороне сервера' });
   }
