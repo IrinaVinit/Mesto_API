@@ -13,11 +13,11 @@ export default (
       .status(err.statusCode)
       .send({ message: err.message });
   }
-  if ('code' in err && err.code === 11000) {
-    return res
-      .status(StatusCodes.CONFLICT)
-      .send({ message: 'Пользователь с указанным email уже зарегистирован' });
-  }
+  // if (err.statusCode === 11000) {
+  //   return res
+  //     .status(StatusCodes.CONFLICT)
+  //     .send({ message: 'Пользователь с указанным email уже зарегистирован' });
+  // }
 
   if (err instanceof Error && err.name === 'NotFoundError') {
     return res.status(StatusCodes.NOT_FOUND).send({ message: err });

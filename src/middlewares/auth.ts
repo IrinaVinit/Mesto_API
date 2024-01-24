@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 export const auth = (req: Request, res: Response, next: NextFunction) => {
-  const cookie = req.cookies.token;
+  const cookie = req.cookies?.token;
   if (!cookie) {
     return res
       .status(StatusCodes.UNAUTHORIZED)
