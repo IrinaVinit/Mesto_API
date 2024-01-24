@@ -1,9 +1,8 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import mongoose from 'mongoose';
 import Card from '../models/card';
 
-export const createCard = async (req: Request, res: Response) => {
+export const createCard = async (req: Request, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
   try {
     const card = await Card.create({
@@ -11,25 +10,22 @@ export const createCard = async (req: Request, res: Response) => {
       link,
       owner: req.user._id,
     });
-    return res.status(StatusCodes.CREATED).send(card);
+    res.status(StatusCodes.CREATED).send(card);
   } catch (err) {
-    if (err instanceof mongoose.Error.ValidationError) {
-      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки' });
-    }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка при создании карточки' });
+    next(err);
   }
 };
 
-export const getCards = async (req: Request, res: Response) => {
+export const getCards = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const cards = await Card.find({});
-    return res.send(cards);
+    res.send(cards);
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка при загрузке карточек' });
+    next(err);
   }
 };
 
-export const deleteCard = async (req: Request, res: Response) => {
+export const deleteCard = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const card = await Card.findById(req.params.cardId).orFail(() => {
       const error = new Error('Пользователь не найден');
@@ -44,20 +40,11 @@ export const deleteCard = async (req: Request, res: Response) => {
     const cardToDelete = await card.deleteOne();
     return res.status(StatusCodes.OK).send(cardToDelete);
   } catch (err) {
-    if (err instanceof mongoose.Error.CastError) {
-      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Передан невалидный ID' });
-    }
-    if (err instanceof Error && err.name === 'NotFoundError') {
-      return res.status(StatusCodes.NOT_FOUND).send({ message: err });
-    }
-    if (err instanceof Error && err.name === 'AccessError') {
-      return res.status(StatusCodes.FORBIDDEN).send({ message: err });
-    }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Oшибка на стороне сервера' });
+    return next(err);
   }
 };
 
-const updateLike = async (req: Request, res: Response, method: string) => {
+const updateLike = async (req: Request, res: Response, method: string, next: NextFunction) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -69,18 +56,12 @@ const updateLike = async (req: Request, res: Response, method: string) => {
         err.name = 'NotFoundError';
         return err;
       });
-    return res.send(card);
+    res.send(card);
   } catch (err) {
-    if (err instanceof Error && err.name === 'NotFoundError') {
-      return res.status(StatusCodes.NOT_FOUND).send({ message: err });
-    }
-    if (err instanceof mongoose.Error.CastError) {
-      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Передан невалидный ID' });
-    }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Oшибка на стороне сервера' });
+    next(err);
   }
 };
 
-export const likeCard = (req: Request, res: Response) => updateLike(req, res, '$addToSet');
+export const likeCard = (req: Request, res: Response, next: NextFunction) => updateLike(req, res, '$addToSet', next);
 
-export const dislikeCard = (req: Request, res: Response) => updateLike(req, res, '$pull');
+export const dislikeCard = (req: Request, res: Response, next: NextFunction) => updateLike(req, res, '$pull', next);
