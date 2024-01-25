@@ -8,11 +8,6 @@ export default (
   res: Response,
   next: NextFunction,
 ) => {
-  if (err.statusCode) {
-    return res
-      .status(err.statusCode)
-      .send({ message: err.message });
-  }
   if (err.statusCode === 11000) {
     return res
       .status(StatusCodes.CONFLICT)
