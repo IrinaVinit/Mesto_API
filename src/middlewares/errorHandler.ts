@@ -13,6 +13,7 @@ export default (
       .status(err.statusCode)
       .send({ message: err.message });
   }
+  console.log(err);
   if (err.statusCode === 11000) {
     return res
       .status(StatusCodes.CONFLICT)

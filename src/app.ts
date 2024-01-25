@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import 'dotenv/config';
+import cookieParser from 'cookie-parser';
 import { errorLogger, requestLogger } from './middlewares/logger';
 import { auth } from './middlewares/auth';
 import { createUser, login } from './controllers/users';
@@ -12,6 +13,7 @@ const helmet = require('helmet');
 const { PORT = 3003, MONGO_URL } = process.env;
 
 const app = express();
+app.use(cookieParser());
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

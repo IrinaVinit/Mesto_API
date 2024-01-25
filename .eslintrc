@@ -39,7 +39,8 @@
             }
         ],
         "no-underscore-dangle": ["error", { "allow": ["_id"] }],
-        "import/prefer-default-export": "off"
+        "import/prefer-default-export": "off",
+        "max-len": "off"
 
     }
 }

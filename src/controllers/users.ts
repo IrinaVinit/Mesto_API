@@ -28,10 +28,7 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const getMyUser = async (req: Request, res: Response) => {
-  const user = await User.findById(req.user._id);
-  res.send(user);
-};
+export const getMyUser = async (req: Request, res: Response, next: NextFunction) => getUserById(req, res, next);
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   const {
@@ -86,7 +83,12 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       return Promise.reject(new Error('Пользователя с такими данными не существует'));
     }
     const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
-    return res.status(StatusCodes.OK).cookie('token', token).send();
+    return res.status(StatusCodes.OK).cookie('token', token, {
+      maxAge: 3600000,
+      httpOnly: true,
+      sameSite: true,
+    })
+      .end();
   } catch (err) {
     return next(err);
   }
