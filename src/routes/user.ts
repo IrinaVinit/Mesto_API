@@ -7,8 +7,9 @@ import {
 const userRouter = Router();
 
 userRouter.get('/', getUsers);
-userRouter.get('/:userId', getUserById);
 userRouter.get('/me', getMyUser);
+userRouter.get('/:userId', getUserById);
+
 userRouter.patch('/me', updateUser);
 userRouter.patch('/me/avatar', updateAvatar);
 

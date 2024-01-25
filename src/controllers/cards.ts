@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import ForbiddenError from '../errors/ForbiddenError';
+import NotFoundError from '../errors/NotFoundError';
 import Card from '../models/card';
 
 export const createCard = async (req: Request, res: Response, next: NextFunction) => {
@@ -28,14 +30,10 @@ export const getCards = async (req: Request, res: Response, next: NextFunction) 
 export const deleteCard = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const card = await Card.findById(req.params.cardId).orFail(() => {
-      const error = new Error('Пользователь не найден');
-      error.name = 'NotFoundError';
-      return error;
+      throw new NotFoundError('Пользователь с указанным _id не найден');
     });
     if (card.owner.toString() !== req.user?._id) {
-      const error = new Error('Вы можете удалять только свои карточки');
-      error.name = 'AccessError';
-      return error;
+      throw new ForbiddenError('Вы можете удалять только свои карточки');
     }
     const cardToDelete = await card.deleteOne();
     return res.status(StatusCodes.OK).send(cardToDelete);

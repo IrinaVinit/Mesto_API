@@ -31,6 +31,7 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 export const getMyUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = await User.findById(req.user._id);
+
     res.send(user);
   } catch (err) {
     next(err);
