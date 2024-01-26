@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import 'dotenv/config';
 import cookieParser from 'cookie-parser';
 import { errors } from 'celebrate';
-import { createUserValidation, loginValidation } from 'validation/validation';
+import { createUserValidation, loginValidation } from './validation/validation';
 import { errorLogger, requestLogger } from './middlewares/logger';
 import { auth } from './middlewares/auth';
 import { createUser, login } from './controllers/users';
