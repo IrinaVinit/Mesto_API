@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import 'dotenv/config';
 import cookieParser from 'cookie-parser';
 import { errors } from 'celebrate';
+import { createUserValidation, loginValidation } from 'validation/validation';
 import { errorLogger, requestLogger } from './middlewares/logger';
 import { auth } from './middlewares/auth';
 import { createUser, login } from './controllers/users';
@@ -25,8 +26,8 @@ app.use(errorHandler);
 mongoose.connect(MONGO_URL as string);
 app.use(requestLogger);
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', loginValidation, login);
+app.post('/signup', createUserValidation, createUser);
 
 app.use(auth);
 app.use('/users', userRouter);
