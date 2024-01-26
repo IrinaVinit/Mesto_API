@@ -3,12 +3,12 @@ import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
 
 export default (
-  err: { statusCode: number; message: string; },
+  err: { code: number }| Error,
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  if (err.statusCode === 11000) {
+  if ('code' in err && err.code === 11000) {
     return res
       .status(StatusCodes.CONFLICT)
       .send({ message: 'Пользователь с указанным email уже зарегистирован' });

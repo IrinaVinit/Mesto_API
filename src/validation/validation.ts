@@ -1,6 +1,6 @@
 const { celebrate, Joi } = require('celebrate');
 
-const idValidation = Joi.string().required().length(24);
+const idValidation = Joi.string().length(24).hex().required();
 const nameValidation = Joi.string().min(2).max(30);
 const aboutValidation = Joi.string().min(2).max(200);
 const linkValidation = Joi.string().uri();
@@ -8,12 +8,6 @@ const emailValidation = Joi.string().required().email();
 const passwordValidation = Joi.string().required();
 
 export const getUserByIdValidation = celebrate({
-  params: Joi.object().keys({
-    userId: idValidation,
-  }),
-});
-
-export const getMyUserValidationValidation = celebrate({
   params: Joi.object().keys({
     userId: idValidation,
   }),

@@ -20,8 +20,6 @@ app.use(cookieParser());
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(errors());
-app.use(errorHandler);
 
 mongoose.connect(MONGO_URL as string);
 app.use(requestLogger);
@@ -34,6 +32,8 @@ app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 
 app.use(errorLogger);
+app.use(errors());
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console

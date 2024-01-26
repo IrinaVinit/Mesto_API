@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import jwt from 'jsonwebtoken';
+import NotFoundError from '../errors/NotFoundError';
+import UnauthorizedError from '../errors/UnauthorizedError';
+import InvalidRequest from '../errors/InvalidRequest';
 import User from '../models/user';
 
 const bcrypt = require('bcrypt');
@@ -17,11 +20,7 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
 export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.params;
-    const user = await User.findById(userId).orFail(() => {
-      const err = new Error('Пользователь не найден');
-      err.name = 'NotFoundError';
-      return err;
-    });
+    const user = await User.findById(userId).orFail();
     res.send(user);
   } catch (err) {
     next(err);
@@ -31,7 +30,6 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 export const getMyUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = await User.findById(req.user._id);
-
     res.send(user);
   } catch (err) {
     next(err);
@@ -47,7 +45,13 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     const user = await User.create({
       name, about, avatar, email, password: hashPassword,
     });
-    res.status(StatusCodes.CREATED).send(user);
+    res.status(StatusCodes.CREATED).send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+      _id: user._id,
+    });
   } catch (err) {
     next(err);
   }
@@ -84,11 +88,11 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      return Promise.reject(new Error('Пользователя с такими данными не существует'));
+      return next(new UnauthorizedError('Пользователя с такими данными не существует'));
     }
     const matched = await bcrypt.compare(password, user.password);
     if (!matched) {
-      return Promise.reject(new Error('Пользователя с такими данными не существует'));
+      return next(new InvalidRequest('Пользователя с такими данными не существует'));
     }
     const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
     return res.status(StatusCodes.OK).cookie('token', token, {
