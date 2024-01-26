@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import jwt from 'jsonwebtoken';
-import NotFoundError from '../errors/NotFoundError';
 import UnauthorizedError from '../errors/UnauthorizedError';
 import InvalidRequest from '../errors/InvalidRequest';
 import User from '../models/user';
