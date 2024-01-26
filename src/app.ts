@@ -9,7 +9,7 @@ import { auth } from './middlewares/auth';
 import { createUser, login } from './controllers/users';
 import cardRouter from './routes/cards';
 import userRouter from './routes/user';
-import errorHandler from './middlewares/errorHandler';
+import { errorHandler } from './middlewares/errorHandler';
 
 const helmet = require('helmet');
 

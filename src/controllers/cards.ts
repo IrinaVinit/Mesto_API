@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import mongoose from 'mongoose';
+import InvalidRequest from '../errors/InvalidRequest';
 import ForbiddenError from '../errors/ForbiddenError';
 import NotFoundError from '../errors/NotFoundError';
 import Card from '../models/card';
@@ -14,7 +16,11 @@ export const createCard = async (req: Request, res: Response, next: NextFunction
     });
     res.status(StatusCodes.CREATED).send(card);
   } catch (err) {
-    next(err);
+    if (err instanceof mongoose.Error.ValidationError) {
+      next(new InvalidRequest('Переданы некорректные данные'));
+    } else {
+      next(err);
+    }
   }
 };
 
@@ -30,15 +36,15 @@ export const getCards = async (req: Request, res: Response, next: NextFunction) 
 export const deleteCard = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const card = await Card.findById(req.params.cardId).orFail(() => {
-      throw new NotFoundError('Пользователь с указанным _id не найден');
+      throw new NotFoundError('Нет карточки по заданному _id');
     });
     if (card.owner.toString() !== req.user?._id) {
       throw new ForbiddenError('Вы можете удалять только свои карточки');
     }
     const cardToDelete = await card.deleteOne();
-    return res.status(StatusCodes.OK).send(cardToDelete);
+    res.status(StatusCodes.OK).send(cardToDelete);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 };
 
@@ -50,13 +56,15 @@ const updateLike = async (req: Request, res: Response, method: string, next: Nex
       { new: true },
     )
       .orFail(() => {
-        const err = new Error('Нет карточки по заданному _id');
-        err.name = 'NotFoundError';
-        return err;
+        throw new NotFoundError('Нет карточки по заданному _id');
       });
     res.send(card);
   } catch (err) {
-    next(err);
+    if (err instanceof mongoose.Error.CastError) {
+      next(new InvalidRequest('Переданы невалидные данные'));
+    } else {
+      next(err);
+    }
   }
 };
 

@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
+import ConflictError from '../errors/ConflictError';
 import UnauthorizedError from '../errors/UnauthorizedError';
 import InvalidRequest from '../errors/InvalidRequest';
 import User from '../models/user';
@@ -22,7 +24,11 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
     const user = await User.findById(userId).orFail();
     res.send(user);
   } catch (err) {
-    next(err);
+    if (err instanceof mongoose.Error.CastError) {
+      next(new InvalidRequest('Не валидный ID пользователя'));
+    } else {
+      next(err);
+    }
   }
 };
 
@@ -51,8 +57,15 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
       email: user.email,
       _id: user._id,
     });
-  } catch (err) {
-    next(err);
+  } catch (err: any) {
+    if (err instanceof mongoose.Error.ValidationError) {
+      next(new InvalidRequest('Переданы некорректные данные при создании пользователя'));
+    }
+    if (err.code === 11000) {
+      next(new ConflictError('Пользователь с указанным email уже зарегистрирован'));
+    } else {
+      next(err);
+    }
   }
 };
 
@@ -65,7 +78,11 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     });
     res.send(user);
   } catch (err) {
-    next(err);
+    if (err instanceof mongoose.Error.ValidationError) {
+      next(new InvalidRequest('Переданы некорректные данные'));
+    } else {
+      next(err);
+    }
   }
 };
 
@@ -91,7 +108,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     }
     const matched = await bcrypt.compare(password, user.password);
     if (!matched) {
-      return next(new InvalidRequest('Пользователя с такими данными не существует'));
+      return next(new UnauthorizedError('Пользователя с такими данными не существует'));
     }
     const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
     return res.status(StatusCodes.OK).cookie('token', token, {
